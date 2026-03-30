@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待办事项</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #a8d8ea 0%, #b8e0f7 30%, #daeaf6 60%, #e8f4fd 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px 80px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2c5f7a;
+      letter-spacing: -0.5px;
+    }
+
+    .title span {
+      font-size: 14px;
+      font-weight: 400;
+      color: #6a9eb5;
+      margin-left: 8px;
+    }
+
+    .add-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(44, 95, 122, 0.85);
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(44, 95, 122, 0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+      flex-shrink: 0;
+    }
+
+    .add-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 20px rgba(44, 95, 122, 0.4);
+    }
+
+    .add-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Input area */
+    .input-area {
+      display: none;
+      margin-bottom: 16px;
+      animation: slideDown 0.2s ease;
+    }
+
+    .input-area.visible {
+      display: flex;
+      gap: 10px;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 12px rgba(100, 170, 210, 0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+      font-size: 15px;
+      color: #2c5f7a;
+      outline: none;
+      transition: box-shadow 0.2s;
+    }
+
+    .task-input::placeholder {
+      color: #9abfd4;
+    }
+
+    .task-input:focus {
+      box-shadow: 0 2px 12px rgba(100, 170, 210, 0.35), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 0 2px rgba(44, 95, 122, 0.2);
+    }
+
+    .confirm-btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(44, 95, 122, 0.85);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .confirm-btn:hover { opacity: 0.9; }
+    .confirm-btn:active { transform: scale(0.97); }
+
+    /* Stats bar */
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-size: 12px;
+      color: #5a90aa;
+      font-weight: 500;
+    }
+
+    .stat-chip b {
+      color: #2c5f7a;
+    }
+
+    /* Task list */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 2px 16px rgba(100, 170, 210, 0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(100, 170, 210, 0.25), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+
+    .task-item.done {
+      opacity: 0.55;
+    }
+
+    /* Checkbox */
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #7bbcd5;
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .checkbox.checked {
+      background: #4a9abb;
+      border-color: #4a9abb;
+    }
+
+    .checkbox .check-icon {
+      display: none;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .checkbox.checked .check-icon {
+      display: block;
+    }
+
+    /* Task text */
+    .task-text {
+      flex: 1;
+      font-size: 15px;
+      color: #2c5f7a;
+      line-height: 1.4;
+      word-break: break-word;
+      transition: color 0.2s;
+    }
+
+    .task-item.done .task-text {
+      text-decoration: line-through;
+      color: #9abfd4;
+    }
+
+    /* Delete button */
+    .del-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: transparent;
+      color: #b0cfe0;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .del-btn:hover {
+      background: rgba(220, 100, 100, 0.12);
+      color: #d97070;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 60px 0 40px;
+      color: #9abfd4;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .empty p {
+      font-size: 14px;
+    }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+      body { padding: 28px 12px 60px; }
+      .title { font-size: 24px; }
+      .task-item { padding: 12px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">
+        待办事项
+        <span id="date-label"></span>
+      </div>
+      <button class="add-btn" id="toggleBtn" title="添加任务">+</button>
+    </div>
+
+    <div class="input-area" id="inputArea">
+      <input class="task-input" id="taskInput" type="text" placeholder="输入任务内容…" maxlength="100">
+      <button class="confirm-btn" id="confirmBtn">添加</button>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'todo_tasks';
+    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let inputVisible = false;
+
+    // Date label
+    const d = new Date();
+    document.getElementById('date-label').textContent =
+      `${d.getMonth() + 1}月${d.getDate()}日`;
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function renderStats() {
+      const total = tasks.length;
+      const done = tasks.filter(t => t.done).length;
+      const el = document.getElementById('stats');
+      if (total === 0) { el.innerHTML = ''; return; }
+      el.innerHTML = `
+        <div class="stat-chip">全部 <b>${total}</b></div>
+        <div class="stat-chip">已完成 <b>${done}</b></div>
+        <div class="stat-chip">待完成 <b>${total - done}</b></div>
+      `;
+    }
+
+    function renderList() {
+      const list = document.getElementById('taskList');
+      if (tasks.length === 0) {
+        list.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">☁️</div>
+            <p>暂无任务，点击右上角添加吧</p>
+          </div>`;
+        return;
+      }
+      list.innerHTML = '';
+      tasks.forEach((task, i) => {
+        const item = document.createElement('div');
+        item.className = 'task-item' + (task.done ? ' done' : '');
+
+        const cb = document.createElement('div');
+        cb.className = 'checkbox' + (task.done ? ' checked' : '');
+        cb.innerHTML = '<span class="check-icon">✓</span>';
+        cb.addEventListener('click', () => toggle(i));
+
+        const text = document.createElement('div');
+        text.className = 'task-text';
+        text.textContent = task.text;
+
+        const del = document.createElement('button');
+        del.className = 'del-btn';
+        del.title = '删除';
+        del.textContent = '×';
+        del.addEventListener('click', () => remove(i));
+
+        item.append(cb, text, del);
+        list.appendChild(item);
+      });
+    }
+
+    function render() { renderStats(); renderList(); }
+
+    function toggle(i) {
+      tasks[i].done = !tasks[i].done;
+      save(); render();
+    }
+
+    function remove(i) {
+      tasks.splice(i, 1);
+      save(); render();
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      if (!text) { input.focus(); return; }
+      tasks.unshift({ text, done: false, id: Date.now() });
+      input.value = '';
+      save(); render();
+      input.focus();
+    }
+
+    // Toggle input area
+    document.getElementById('toggleBtn').addEventListener('click', () => {
+      inputVisible = !inputVisible;
+      const area = document.getElementById('inputArea');
+      const btn = document.getElementById('toggleBtn');
+      if (inputVisible) {
+        area.classList.add('visible');
+        btn.textContent = '×';
+        btn.style.fontSize = '26px';
+        setTimeout(() => document.getElementById('taskInput').focus(), 50);
+      } else {
+        area.classList.remove('visible');
+        btn.textContent = '+';
+        btn.style.fontSize = '22px';
+      }
+    });
+
+    document.getElementById('confirmBtn').addEventListener('click', addTask);
+
+    document.getElementById('taskInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTask();
+      if (e.key === 'Escape') document.getElementById('toggleBtn').click();
+    });
+
+    render();
+  </script>
+</body>
+</html>
