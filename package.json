@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.0",
+    "js-tiktoken": "^1.0.21",
     "next": "^15.2.0",
     "openai": "^6.33.0",
+    "p-retry": "^8.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import TodoApp from './TodoApp'
 import PromptGen from './PromptGen'
+import StreamChat from './StreamChat'
 
-type Tab = 'todo' | 'prompt'
+type Tab = 'todo' | 'prompt' | 'chat'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'todo', label: '待办清单' },
   { id: 'prompt', label: '提示词生成' },
+  { id: 'chat', label: '流式 AI' },
 ]
 
 export default function HomeLayout() {
@@ -35,6 +37,7 @@ export default function HomeLayout() {
 
       <div className={activeTab === 'todo' ? undefined : 'hidden'}><TodoApp /></div>
       <div className={activeTab === 'prompt' ? undefined : 'hidden'}><PromptGen /></div>
+      <div className={activeTab === 'chat' ? undefined : 'hidden'}><StreamChat /></div>
     </div>
   )
 }
