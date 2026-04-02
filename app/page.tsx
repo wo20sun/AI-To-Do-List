@@ -1,5 +1,5 @@
-import TodoApp from '@/components/TodoApp'
+import HomeLayout from '@/components/HomeLayout'
 
 export default function Home() {
-  return <TodoApp />
+  return <HomeLayout />
 }
